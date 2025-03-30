@@ -1,9 +1,11 @@
 package com.example.politicalprediction.home.presentation
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.politicalprediction.home.data.model.PredictionDTO
+import com.example.politicalprediction.home.data.repository.PredictRepository
 
 class HomeViewModel : ViewModel() {
 
@@ -22,6 +24,9 @@ class HomeViewModel : ViewModel() {
     private val _isFormal = MutableLiveData<Boolean>()
     private val _isEmocional = MutableLiveData<Boolean>()
 
+    private val _predicted = MutableLiveData<Boolean>()
+    private val _prediction = MutableLiveData<String>()
+
     val content: LiveData<String> = _content
     val country: LiveData<String> = _country
     val politicTematic: LiveData<String> = _politicTematic
@@ -37,6 +42,9 @@ class HomeViewModel : ViewModel() {
     val isFormal: LiveData<Boolean> = _isFormal
     val isEmocional: LiveData<Boolean> = _isEmocional
 
+    val predicted: LiveData<Boolean> = _predicted
+    val prediction: LiveData<String> = _prediction
+
     fun onChangeContent(value: String) {
         _content.value = value
     }
@@ -49,31 +57,31 @@ class HomeViewModel : ViewModel() {
         _politicTematic.value = value
     }
 
-    fun onChangeSources(value: Int) {
-        _sources.value = value
+    fun onChangeSources(value: String) {
+        _sources.value = value.toInt()
     }
 
-    fun onChangeStadistics(value: Int) {
-        _stadistics.value = value
+    fun onChangeStadistics(value: String) {
+        _stadistics.value = value.toInt()
     }
 
-    fun onChangeAdjectives(value: Int) {
-        _adjectives.value = value
+    fun onChangeAdjectives(value: String) {
+        _adjectives.value = value.toInt()
     }
-    fun onChangeIdeologicTerms(value: Int) {
-        _ideologicTerms.value = value
-    }
-
-    fun onChangeNWords(value: Int) {
-        _nWords.value = value
+    fun onChangeIdeologicTerms(value: String) {
+        _ideologicTerms.value = value.toInt()
     }
 
-    fun onChangeNImages(value: Int) {
-        _nImages.value = value
+    fun onChangeNWords(value: String) {
+        _nWords.value = value.toInt()
     }
 
-    fun onChangeNQuotes(value: Int) {
-        _nQuotes.value = value
+    fun onChangeNImages(value: String) {
+        _nImages.value = value.toInt()
+    }
+
+    fun onChangeNQuotes(value: String) {
+        _nQuotes.value = value.toInt()
     }
 
     fun onChangeIsRecognized(value: Boolean) {
@@ -92,11 +100,19 @@ class HomeViewModel : ViewModel() {
         _isEmocional.value = value
     }
 
-    suspend fun predictNew(predictionDTO: PredictionDTO){
+    suspend fun predictNew(predictionDTO: PredictionDTO) {
+        _predicted.value = false
+        val repository = PredictRepository()
 
+        val result = repository.predict(predictionDTO)
+
+        result.onSuccess {
+            data ->
+
+            Log.d("API", data.prediccion_principal.categoria)
+            _prediction.value = data.prediccion_principal.categoria
+            _predicted.value = true
+        }
 
     }
-
-
-
 }
